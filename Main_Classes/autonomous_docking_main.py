@@ -157,31 +157,38 @@ class AutonomousDocking:
         """Implements search pattern when docking station not visible."""
         if self.debug:
             print("Executing search strategy")
-        self.driving_data = [0, 0, 0, 5, 0, 0, 0, 0]
-    
+            self.driving_data = [0, 0, 0, 15, 0, 0, 0, 0]  # Rotate 
+
+            # TODO: too simple: implement forward. if detect one move forward to it and stop rotating
+     
     def navigate(self, commands):
         """Controls navigation based on commands."""
+        self.driving_data = [0, 0, 0, 0, 0, 0, 0, 0]
         for command in commands:
             if command == "FORWARD" or command == "UP":
+                self.driving_data[0] = 90
                 print("Moving forward/up")
             elif command == "BACK" or command == "DOWN":
+                self.driving_data[0] = -90
                 print("Moving backward/down")
             elif command == "LEFT":
+                self.driving_data[2] = -90 
                 print("Moving left")
             elif command == "RIGHT":
+                self.driving_data[2] = 90  
                 print("Moving right")
             elif command == "SEARCH":
                 self.search_strategy()
             elif command == "STOP":
+                self.driving_data = [0, 0, 0, 0, 0, 0, 0, 0]
                 print("Stopping movement")
-        
         return True
     
                 
     def get_driving_data(self):
         """Returns and resets driving data."""
         data = self.driving_data.copy()
-        self.driving_data = [40, [0, 0, 0, 0, 0, 0, 0, 0]]
+        self.driving_data = [0, 0, 0, 0, 0, 0, 0, 0]
         return data
         
     def run(self, front_frame, down_frame=None):
@@ -193,74 +200,76 @@ class AutonomousDocking:
         corners, ids, rejected = self.detect_markers(enhanced_frame)
         pallet_center = self.calculate_pallet_center(corners, ids)
         commands = self.get_navigation_command(pallet_center, image_center)
+        if "SEARCH" not in commands and hasattr(self, 'search_step'):
+            self.search_step = 0
         self.navigate(commands)
         processed_frame = self.frame.copy()
         processed_frame = self.display_markers(corners, ids, processed_frame, pallet_center)
         data = self.get_driving_data()
         return processed_frame, self.down_frame, data
 
-#testing with webcam and iphone 
-def init_camera():
-    """Initializes and configures camera."""
-    cap = cv.VideoCapture(0)
-    if not cap.isOpened():
-        print("Error: Could not open camera.")
-        return None
-    cap.set(cv.CAP_PROP_FRAME_WIDTH, 1920)
-    cap.set(cv.CAP_PROP_FRAME_HEIGHT, 1080)
-    return cap
+# #testing with webcam and iphone 
+# def init_camera():
+#     """Initializes and configures camera."""
+#     cap = cv.VideoCapture(0)
+#     if not cap.isOpened():
+#         print("Error: Could not open camera.")
+#         return None
+#     cap.set(cv.CAP_PROP_FRAME_WIDTH, 1920)
+#     cap.set(cv.CAP_PROP_FRAME_HEIGHT, 1080)
+#     return cap
 
-def resize_frame(frame, target_height):
-    """Resizes frame to target height maintaining aspect ratio."""
-    ratio = target_height / frame.shape[0]
-    new_width = int(frame.shape[1] * ratio)
-    resized_frame = cv.resize(frame, (new_width, target_height), interpolation=cv.INTER_AREA)
-    return resized_frame
+# def resize_frame(frame, target_height):
+#     """Resizes frame to target height maintaining aspect ratio."""
+#     ratio = target_height / frame.shape[0]
+#     new_width = int(frame.shape[1] * ratio)
+#     resized_frame = cv.resize(frame, (new_width, target_height), interpolation=cv.INTER_AREA)
+#     return resized_frame
 
-def main():
-    """Main function to run the autonomous docking system."""
-    cap = init_camera()
-    if not cap:
-        sys.exit("Error: Unable to initialize camera.")  
-    camera_matrix = np.array([[942.6, 0, 998.5], [0, 940.4, 483.6], [0, 0, 1]])
-    dist_coeffs = np.array([[-0.400, 0.210, 7.31e-3, -6.25e-3, -7.03e-2]]).reshape(-1, 1)
-    docking_system = AutonomousDocking(camera_matrix=camera_matrix, dist_coeffs=dist_coeffs)
-    while cap.isOpened():
-        ret, frame = cap.read()
-        if not ret:
-            print("Error: Can't read frame.")
-            break    
-        frame = resize_frame(frame, 1000)
-        processed_frame, down_frame, driving_data = docking_system.run(frame)
-        image_center = (frame.shape[1] // 2, frame.shape[0] // 2)
-        enhanced_frame = docking_system.enhance_image(frame)
-        corners, ids, reject = docking_system.detect_markers(enhanced_frame)
-        pallet_center = docking_system.calculate_pallet_center(corners, ids)
+# def main():
+#     """Main function to run the autonomous docking system."""
+#     cap = init_camera()
+#     if not cap:
+#         sys.exit("Error: Unable to initialize camera.")  
+#     camera_matrix = np.array([[942.6, 0, 998.5], [0, 940.4, 483.6], [0, 0, 1]])
+#     dist_coeffs = np.array([[-0.400, 0.210, 7.31e-3, -6.25e-3, -7.03e-2]]).reshape(-1, 1)
+#     docking_system = AutonomousDocking(camera_matrix=camera_matrix, dist_coeffs=dist_coeffs)
+#     while cap.isOpened():
+#         ret, frame = cap.read()
+#         if not ret:
+#             print("Error: Can't read frame.")
+#             break    
+#         frame = resize_frame(frame, 1000)
+#         processed_frame, down_frame, driving_data = docking_system.run(frame)
+#         image_center = (frame.shape[1] // 2, frame.shape[0] // 2)
+#         enhanced_frame = docking_system.enhance_image(frame)
+#         corners, ids, reject = docking_system.detect_markers(enhanced_frame)
+#         pallet_center = docking_system.calculate_pallet_center(corners, ids)
 
-        commands = docking_system.get_navigation_command(pallet_center, image_center)
-        docking_system.navigate(commands)
-        for command in commands:
-            print(f"Command: {command}")
+#         commands = docking_system.get_navigation_command(pallet_center, image_center)
+#         docking_system.navigate(commands)
+#         for command in commands:
+#             print(f"Command: {command}")
 
-        frame = docking_system.display_markers(corners, ids, frame, pallet_center)
-        undistorted_frame = docking_system.undistort_image(frame)
-        cv.imshow("ArUco: ", undistorted_frame)
-        if docking_system.debug:
-            print(f"Driving data: {driving_data}")   
-        cv.imshow("ArUco Detection", processed_frame)
-        if cv.waitKey(1) & 0xFF == ord('q'):
-            break
-    cap.release()
-    cv.destroyAllWindows() 
-
-if __name__ == "__main__":
-    main()
+#         frame = docking_system.display_markers(corners, ids, frame, pallet_center)
+#         undistorted_frame = docking_system.undistort_image(frame)
+#         cv.imshow("ArUco: ", undistorted_frame)
+#         if docking_system.debug:
+#             print(f"Driving data: {driving_data}")   
+#         cv.imshow("ArUco Detection", processed_frame)
+#         if cv.waitKey(1) & 0xFF == ord('q'):
+#             break
+#     cap.release()
+#     cv.destroyAllWindows() 
 
 # if __name__ == "__main__":
-#     start = time.perf_counter()
-#     a = AutonomousDocking()
-#     frame = cv.imread("../camerafeed/images/dockingPallet.png")
-#     a.run(frame, frame.copy())
-#     print(time.perf_counter() - start)
+#     main()
+
+if __name__ == "__main__":
+    start = time.perf_counter()
+    a = AutonomousDocking()
+    frame = cv.imread("../camerafeed/images/dockingPallet.png")
+    a.run(frame, frame.copy())
+    print(time.perf_counter() - start)
 
    

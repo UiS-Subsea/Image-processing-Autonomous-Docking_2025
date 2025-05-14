@@ -3,7 +3,7 @@ import numpy as np
 import time
 import math
 
-class AutonomousTransect:
+class PipelineInspection:
     def __init__(self):
         self.frame = None
         self.driving_data = [0, 0, 0, 0, 0, 0, 0, 0]
@@ -27,7 +27,7 @@ class AutonomousTransect:
         self.detected_markers_ids = []
         self.marker_positions = {} 
         self.last_marker_time = time.time()
-        self.no_marker_timeout = 30
+        self.no_marker_timeout = 60
         
         # State management
         self.tracking_state = "FIND_PIPELINE"  # States: FIND_PIPELINE, TRACK_PIPELINE, COMPLETE
@@ -53,27 +53,26 @@ class AutonomousTransect:
             for i, marker_id in enumerate(ids):
                 id_int = int(marker_id[0])
                 # Calculate marker center
-                center = np.mean(corners[i][0], axis=0).astype(int)
-                
-                # Add to list if not already present
-                if id_int not in self.detected_markers_ids:
-                    self.detected_markers_ids.append(id_int)
-                    self.marker_positions[id_int] = center
-                    self.last_marker_time = time.time()
-                    print(f"New marker detected! ID: {id_int}")
-                
-                # Display ID and center on frame
-                cv.putText(self.frame, f"ID: {id_int}", 
-                          (center[0] + 10, center[1]), 
-                          cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-                cv.circle(self.frame, tuple(center), 5, (0, 255, 0), -1)
+                if 1 <= id_int <= 99:
+                    center = np.mean(corners[i][0], axis=0).astype(int)
+                    
+                    # Add to list if not already present
+                    if id_int not in self.detected_markers_ids:
+                        self.detected_markers_ids.append(id_int)
+                        self.marker_positions[id_int] = center
+                        self.last_marker_time = time.time()
+                        print(f"New marker detected! ID: {id_int}")
+                    
+                    # Display ID and center on frame
+                    cv.putText(self.frame, f"ID: {id_int}", 
+                            (center[0] + 10, center[1]), 
+                            cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+                    cv.circle(self.frame, tuple(center), 5, (0, 255, 0), -1)
 
     def detect_pinger(self, acoustic_data=None):
         # TODO: Implement actual acoustic signal processing
       pass 
 
-
-   
     
     def run(self, frame):
         self.frame = frame
@@ -334,8 +333,12 @@ class AutonomousTransect:
             z_power = -dy_percent * scale #vertical position
         else:
             z_power = 0
-        angle = self.pipeline_direction if self.pipeline_direction is not None else 0
-        # angular adjustment to align with pipeline direction
+        if  self.pipeline_direction is not None:
+            angle = self.pipeline_direction
+        else:
+            angle = 0
+        #angle = self.pipeline_direction if self.pipeline_direction is not None else 0
+        #angular adjustment to align with pipeline direction
         if self.pipeline_direction is not None:
             heading_error = self.pipeline_direction
             rot_power = heading_error * 0.1  # Proportional control
@@ -347,14 +350,11 @@ class AutonomousTransect:
                 (10, 30), cv.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)     
         self.canstabilize = True
         return [dx, dy], angle #for regulation 
-    
-        
+     
     def autonomous_return(self):
         """Return autonomously to launch site"""
         # TODO: Implementing navigation back to the pinger location autonomously
         pass 
-
-
 
 if __name__ == "__main__":
     transect = AutonomousTransect()
@@ -370,3 +370,5 @@ if __name__ == "__main__":
             break
     cap.release()
     cv.destroyAllWindows()
+    
+        

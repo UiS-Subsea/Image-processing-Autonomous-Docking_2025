@@ -1,10 +1,10 @@
 import threading
 import time
 import numpy as np
-from Main_Classes.autonomous_transect_and_frog_count__main import AutonomousTransect
-from Main_Classes.grass_monitor_main import SeagrassMonitor
+from Main_Classes.PipelineInspection import PipelineInspection
 from Main_Classes.autonomous_docking_main import AutonomousDocking
-from Main_Classes.sfm import MVS
+from Main_Classes.Coralheadmodeling import MVS
+from Main_Classes.visual_inspection_main import VisualInspection
 import cv2
 import multiprocessing as mp
 from PyQt5.QtGui import *
@@ -240,9 +240,9 @@ class ExecutionClass:
         dist_coeffs = np.array([[-0.400, 0.210, 7.31e-3, -6.25e-3, -7.03e-2]]).reshape(-1, 1)
 
 
-        self.AutonomousTransect = AutonomousTransect()
+        self.PipelineInspection = PipelineInspection()
         self.Docking = AutonomousDocking(camera_matrix=camera_matrix, dist_coeffs=dist_coeffs)
-        self.Seagrass = SeagrassMonitor()
+        self.VisualInspection = VisualInspection()
         self.Camera = CameraManager()
         self.tD_Reconstruction =  MVS(
             image_dir="3Dimages",  # Temporary directory to store captured images
@@ -321,20 +321,42 @@ class ExecutionClass:
     def sleep_func(self):
         threading.Timer(1000, self.sleep_func).start()
 
-    def transect(self):
+    def pipeline(self):
         self.done = False
         self.Camera.start_manipulator_cam()  # TODO should be down frame
         while not self.done and self.manual_flag.value == 0:
             self.update_manipulator()  # TODO Should be down frame
-            transect_frame, driving_data_packet, marker_ids, nav_angle, nav_vector = self.AutonomousTransect.run(
+            pipeline_frame, driving_data_packet, marker_ids, nav_angle, nav_vector = self.PipelineInspection.run(
                 self.frame_manipulator
             )
-            self.show(transect_frame, "Transect")
+            self.show(pipeline_frame, "Pipeline")
             self.send_data_to_rov(driving_data_packet, 
                                 marker_ids=marker_ids,
                                 nav_angle=nav_angle,
                                 nav_vector=nav_vector)
             QApplication.processEvents()
+        else:
+            self.stop_everything()
+
+    def inspection(self):
+        """Manage the visual inspection process."""
+        self.done = False
+        self.Camera.start_manipulator_cam()
+        self.Camera.start_down_cam()
+        self.Camera.start_stereo_cam_L()
+        self.Camera.start_stereo_cam_R()
+
+        while not self.done and self.manual_flag.value == 0:
+            self.update_manipulator()
+            self.update_down()
+            self.update_stereo_L()
+            self.update_stereo_R()
+            inspection_frame, frame_under, frame_left, frame_right, driving_data_packet = self.VisualInspection.run(self.frame_manipulator, self.frame_down, self.frame_stereoL, self.frame_stereoR)
+            self.show(inspection_frame, "Visual Inspection")
+            self.show(frame_under, "Down")
+            self.show(frame_left, "Left")
+            self.show(frame_right, "Right")
+            self.send_data_to_rov(driving_data_packet)
         else:
             self.stop_everything()
 
@@ -364,11 +386,6 @@ class ExecutionClass:
         else: 
             self.stop_everything()
 
-
-    def seagrass(self):
-        growth = self.Seagrass.run(self.frame.copy())
-        return growth
-
     def docking(self):
         self.done = False
         self.Camera.start_manipulator_cam()  #For marker detection
@@ -393,6 +410,7 @@ class ExecutionClass:
                         "navigation_angle": nav_angle,
                         "navigation_vector": nav_vector}
         self.driving_queue.put((2, data_to_send))
+    
 
     def normal_camera(self):
         self.done = False
@@ -428,8 +446,8 @@ class ExecutionClass:
         except:
             pass
 
-    def transect_test(self):
-        print("Running Transect!")
+    def pipeline_test(self):
+        print("Running Pipeline!")
 
     def record(self):
         self.done = False
