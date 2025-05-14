@@ -19,7 +19,7 @@ Key feature:
    Visual Inspection: Detection of subsea structures and valve systems
 
 
-## 🔧 Prerequisites
+## Prerequisites
 
 - Python 3.7  
 - GStreamer  
@@ -27,7 +27,7 @@ Key feature:
 
 ---
 
-## ⚙️ Jetson Instructions (MCP2515 for Jetson Nano  )
+## Jetson Instructions (MCP2515 for Jetson Nano  )
 
 Fixes problem on Jetson Nano while attempting to communicate via CAN bus driver (MCP2515). This repo is [fork from seeed](https://github.com/Seeed-Studio/seeed-linux-dtoverlays#readme).
 
