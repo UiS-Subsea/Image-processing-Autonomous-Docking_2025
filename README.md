@@ -7,7 +7,7 @@ Key feature:
 ## 📚 Table of Contents
 - [Key Features](#key-features)
 - [Prerequisites](#prerequisites)
-- [Jetson Instructions](#jetson-instructions)
+- [Jetson Instructions (MCP2515 for Jetson Nano)](#jetson-instructions)
 - [How to Run the Code](#how-to-run-the-code) 
 
  3D Modeling: Structure from Motion (SfM) implementation for generating 3D models from 2D image sequences
@@ -27,7 +27,7 @@ Key feature:
 
 ---
 
-## Jetson Instructions (MCP2515 for Jetson Nano  )
+## Jetson Instructions (MCP2515 for Jetson Nano)
 
 Fixes problem on Jetson Nano while attempting to communicate via CAN bus driver (MCP2515). This repo is [fork from seeed](https://github.com/Seeed-Studio/seeed-linux-dtoverlays#readme).
 
