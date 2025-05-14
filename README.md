@@ -7,7 +7,8 @@ Key feature:
 ## 📚 Table of Contents
 - [Key Features](#key-features)
 - [Prerequisites](#prerequisites)
-- [Jetson Instructions (MCP2515 for Jetson Nano)](#jetson-instructions)
+- [Jetson Instructions (MCP2515 for Jetson Nano)](#jetson-instructions-mcp2515-for-jetson-nano)
+
 - [How to Run the Code](#how-to-run-the-code) 
 
  3D Modeling: Structure from Motion (SfM) implementation for generating 3D models from 2D image sequences
