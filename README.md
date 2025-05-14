@@ -1,7 +1,33 @@
 # Image processing Autonomous Docking
 
 
-# MCP2515 for Jetson Nano
+This repository contains the image processing and autonomous navigation system developed for the UiS Subsea's Yme ROV... 
+Key feature: 
+
+## 📚 Table of Contents
+- [Key Features](#key-features)
+- [Prerequisites](#prerequisites)
+- [Jetson Instructions](#jetson-instructions)
+- [How to Run the Code](#how-to-run-the-code) 
+
+ 3D Modeling: Structure from Motion (SfM) implementation for generating 3D models from 2D image sequences
+
+   Autonomous Docking: Vision-based docking system using ArUco marker detection
+
+   Pipeline Inspection: Color-based pipeline detection with elbow/bend recognition for autonomous tracking
+
+   Visual Inspection: Detection of subsea structures and valve systems
+
+
+## 🔧 Prerequisites
+
+- Python 3.7  
+- GStreamer  
+- FFmpeg  
+
+---
+
+## ⚙️ Jetson Instructions (MCP2515 for Jetson Nano  )
 
 Fixes problem on Jetson Nano while attempting to communicate via CAN bus driver (MCP2515). This repo is [fork from seeed](https://github.com/Seeed-Studio/seeed-linux-dtoverlays#readme).
 
@@ -93,3 +119,35 @@ Fixes problem on Jetson Nano while attempting to communicate via CAN bus driver 
   ```
   cansend can0 000#48.69.21.00
   ```
+
+
+## How to Run the Code
+
+This code is meant to be run through the [GUI](https://github.com/UiS-Subsea/GUI_2025).  
+However, if you would like to run the individual files manually, follow the steps below:
+
+1. **Clone the repository**
+
+   ```bash
+   git clone https://github.com/UiS-Subsea/Image-processing-Autonomous-Docking_2025.git
+   cd Image-processing-Autonomous-Docking_2025
+
+
+
+2. **Python3 -m venv venv
+   ```bash 
+   source venv/bin/activate   # On Windows: venv\Scripts\activate
+
+3. Install dependencies
+   ```bash 
+      pip install -r requirements.txt
+
+
+
+
+
+
+
+
+
+
