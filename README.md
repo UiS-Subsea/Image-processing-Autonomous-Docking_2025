@@ -134,13 +134,13 @@ However, if you would like to run the individual files manually, follow the step
 
 
 
-2. **Python3 -m venv venv
+2. Python3 -m venv venv
    ```bash 
    source venv/bin/activate   # On Windows: venv\Scripts\activate
 
 3. Install dependencies
    ```bash 
-      pip install -r requirements.txt
+   pip install -r requirements.txt
 
 
 
